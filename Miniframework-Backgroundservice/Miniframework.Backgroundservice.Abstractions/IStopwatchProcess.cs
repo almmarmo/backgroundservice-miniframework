@@ -5,7 +5,7 @@
         decimal ElapsedSeconds { get; }
         bool IsRunning { get; }
 
-        void Reset();
+        void Restart();
         void Start();
         void Stop();
     }

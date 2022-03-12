@@ -26,9 +26,9 @@ namespace Miniframework.Backgroundservice
             stopwatch.Stop();
         }
 
-        public void Reset()
+        public void Restart()
         {
-            stopwatch.Reset();
+            stopwatch.Restart();
         }
     }
 }

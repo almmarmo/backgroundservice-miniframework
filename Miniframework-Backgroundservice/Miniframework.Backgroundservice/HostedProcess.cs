@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Miniframework.Backgroundservice.HealthCheck;
 using Miniframework.Backgroundservice.Abstractions;
+using System.IO;
 
 namespace Miniframework.Backgroundservice
 {
@@ -37,13 +38,24 @@ namespace Miniframework.Backgroundservice
             return UseLogging(NLOG_SECTION_NAME);
         }
 
+        public HostedProcess UseHealthCheck(string appsettingsSection)
+        {
+            var options = new HealthCheckOptions();
+            configurationRoot.GetSection(appsettingsSection).Bind(options);
+            return UseHealthCheck(options);
+        }
+
         public HostedProcess UseHealthCheck(HealthCheckOptions options)
         {
             UseServices(s => s.AddSingleton(options));
             if (options.ProcessTimeoutSeconds.HasValue && options.ProcessTimeoutSeconds.Value > 0)
                 stopwatch.Start();
 
-            UseServices(s => s.AddHealthChecks().AddCheck<HealthCheckService>("health_check"));
+            UseServices(s => { 
+                s.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
+                s.AddScoped<HealthCheckService>();
+                s.AddHostedService<TcpHeathProbeService>();
+            });
             return this;
 
         }
@@ -53,7 +65,7 @@ namespace Miniframework.Backgroundservice
             if (configurationRoot == null)
                 BuildConfiguration();
 
-            hostBuilder.ConfigureLogging((hostContext, loggingBuilder) =>
+            hostBuilder.ConfigureLogging((loggingBuilder) =>
             {
                 loggingBuilder.ClearProviders();
                 loggingBuilder.SetMinimumLevel(LogLevel.Trace);
@@ -92,6 +104,10 @@ namespace Miniframework.Backgroundservice
 
         public HostedProcess UseAppsettings(string appSettingsFileName)
         {
+            if(!File.Exists(AppContext.BaseDirectory + "\\" + appSettingsFileName))
+            {
+                throw new ArgumentException("AppSettings file not found.");
+            }
             configurationBuilder = new ConfigurationBuilder()
                                     .SetBasePath(AppContext.BaseDirectory)
                                     .AddJsonFile(appSettingsFileName, optional: true, reloadOnChange: true)
