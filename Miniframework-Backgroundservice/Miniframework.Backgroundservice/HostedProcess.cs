@@ -11,6 +11,7 @@ namespace Miniframework.Backgroundservice
     public class HostedProcess
     {
         private const string APPSETTINGS_FILENAME = "appsettings.json";
+        private const string NLOG_SECTION_NAME = "NLog";
 
         private IConfigurationBuilder configurationBuilder;
         private IConfigurationRoot configurationRoot;
@@ -26,6 +27,11 @@ namespace Miniframework.Backgroundservice
 
         public HostedProcess UseLogging()
         {
+            return UseLogging(NLOG_SECTION_NAME);
+        }
+
+        public HostedProcess UseLogging(string nlogSectionName)
+        {
             if (configurationRoot == null)
                 BuildConfiguration();
 
@@ -33,7 +39,7 @@ namespace Miniframework.Backgroundservice
             {
                 loggingBuilder.ClearProviders();
                 loggingBuilder.SetMinimumLevel(LogLevel.Trace);
-                var section = configurationRoot.GetSection("NLog");
+                var section = configurationRoot.GetSection(nlogSectionName);
                 var nlogCofig = new NLogLoggingConfiguration(section);
                 loggingBuilder.AddNLog(nlogCofig);
             });
@@ -68,7 +74,7 @@ namespace Miniframework.Backgroundservice
         {
             configurationBuilder = new ConfigurationBuilder()
                                     .SetBasePath(AppContext.BaseDirectory)
-                                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                                    .AddJsonFile(appSettingsFileName, optional: true, reloadOnChange: true)
                                     .AddEnvironmentVariables();
             return this;
         }
