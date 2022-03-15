@@ -10,7 +10,7 @@ namespace ConsoleTests
             HostedProcess process = new HostedProcess(args);
             process.UseAppsettings()
                 .UseLogging()
-                .UseHealthCheck("hostedProcess")
+                .UseHealthCheck("hostedProcess:healthCheck")
                 .AddHostedService<TestingHostedProcess>()
                 .Run();
         }

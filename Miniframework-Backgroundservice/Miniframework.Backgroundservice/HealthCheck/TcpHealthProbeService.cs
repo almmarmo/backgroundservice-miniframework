@@ -9,14 +9,14 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Miniframework.Backgroundservice.HealthCheck
 {
-    public sealed class TcpHeathProbeService : BackgroundService
+    public sealed class TcpHealthProbeService : BackgroundService
     {
 
         private readonly HealthCheckService _healthCheckService;
         private readonly TcpListener _listener;
         private readonly ILogger _logger;
 
-        public TcpHeathProbeService(HealthCheckService healthCheckService, ILogger<TcpHeathProbeService> logger, HealthCheckOptions options)
+        public TcpHealthProbeService(HealthCheckService healthCheckService, ILogger<TcpHealthProbeService> logger, HealthCheckOptions options)
         {
             _healthCheckService = healthCheckService;
             _logger = logger;

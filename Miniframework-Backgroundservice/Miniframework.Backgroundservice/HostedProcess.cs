@@ -51,11 +51,19 @@ namespace Miniframework.Backgroundservice
             if (options.ProcessTimeoutSeconds.HasValue && options.ProcessTimeoutSeconds.Value > 0)
                 stopwatch.Start();
 
-            UseServices(s => { 
+            UseServices(s =>
+            {
                 s.AddHealthChecks().AddCheck<HealthCheckService>("health_check");
                 s.AddScoped<HealthCheckService>();
-                s.AddHostedService<TcpHeathProbeService>();
             });
+            if (options.Protocol == "http")
+            {
+                UseServices(s => s.AddHostedService<HttpHealthProbeService>());
+            }
+            else
+            {
+                UseServices(s => s.AddHostedService<TcpHealthProbeService>());
+            }
             return this;
 
         }
@@ -104,7 +112,7 @@ namespace Miniframework.Backgroundservice
 
         public HostedProcess UseAppsettings(string appSettingsFileName)
         {
-            if(!File.Exists(AppContext.BaseDirectory + "\\" + appSettingsFileName))
+            if(!File.Exists(appSettingsFileName))
             {
                 throw new ArgumentException("AppSettings file not found.");
             }
